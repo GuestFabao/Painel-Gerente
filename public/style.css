@@ -162,3 +162,42 @@ th {
 .action-buttons .btn-save:hover {
     background-color: #0069d9;
 }
+
+/* Estilo para o novo botão de confirmação */
+.btn-confirmar {
+    background-color: #28a745; /* Verde */
+    color: white;
+    width: 100%;
+}
+.btn-confirmar:hover {
+    background-color: #218838;
+}
+
+/* Estilos para o Dashboard */
+.dashboard-container {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+    gap: 20px;
+    margin-bottom: 30px;
+}
+
+.dashboard-card {
+    background-color: #f8f9fa;
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    border: 1px solid #dee2e6;
+}
+
+.dashboard-card h3 {
+    margin-top: 0;
+    font-size: 16px;
+    color: #6c757d;
+}
+
+.dashboard-card p {
+    margin-bottom: 0;
+    font-size: 24px;
+    font-weight: bold;
+    color: #343a42;
+}

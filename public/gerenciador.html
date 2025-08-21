@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Gerenciador - Controle IPTV</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="gerenciador-container">
+        <header>
+            <h1>Painel de Controle de Clientes</h1>
+            <button id="logoutButton">Sair</button>
+        </header>
+
+        <div class="dashboard-container">
+            <div class="dashboard-card">
+                <h3>Total Recebido (Mês)</h3>
+                <p id="totalRecebido">R$ 0,00</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>Clientes Pagos</h3>
+                <p id="clientesPagos">0</p>
+            </div>
+            <div class="dashboard-card">
+                <h3>Clientes Pendentes/Atrasados</h3>
+                <p id="clientesPendentes">0</p>
+            </div>
+        </div>
+        <div class="form-container">
+        
+        
+            <h3>Adicionar Novo Cliente</h3>
+            <form id="addClienteForm">
+                <input type="text" id="nomeCliente" placeholder="Nome do Cliente" required>
+                <input type="text" id="clienteLogin" placeholder="Login do Cliente">
+                <input type="text" id="clientePlano" placeholder="Plano Contratado">
+                <input type="number" id="valor" placeholder="Valor (R$)" min="0" required>
+                <input type="date" id="dataVencimento" required>
+                <select id="statusPagamento">
+                    <option value="Pendente">Pendente</option>
+                    <option value="Pago">Pago</option>
+                    <option value="Atrasado">Atrasado</option>
+                </select>
+                <button type="submit">Adicionar Cliente</button>
+            </form>
+        </div>
+        <div class="table-container">
+            <h2>Lista de Clientes</h2>
+            <div class="search-container">
+                <input type="text" id="searchInput" placeholder="Buscar por nome...">
+            </div>
+            <table id="clientesTable">
+                <thead>
+                    <tr>
+                        <th>Nome</th>
+                        <th>Login Cliente</th>
+                        <th>Plano</th>
+                        <th>Valor</th>
+                        <th>Vencimento</th>
+                        <th>Status</th>
+                        <th>Ações</th>
+                    </tr>
+                </thead>
+                <tbody id="clientesTbody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script>
+      const firebaseConfig = {
+        apiKey: "AIzaSyAofUVwbWRjmxoIMi2gXmJgpsL5M7rGqic",
+        authDomain: "gerenciador-iptv-2e11e.firebaseapp.com",
+        projectId: "gerenciador-iptv-2e11e",
+        storageBucket: "gerenciador-iptv-2e11e.firebasestorage.app",
+        messagingSenderId: "751962653113",
+        appId: "1:751962653113:web:31308aea4cb018dd59b668"
+      };
+      firebase.initializeApp(firebaseConfig);
+    </script>
+    
+    <script src="script.js"></script>
+</body>
+</html>
