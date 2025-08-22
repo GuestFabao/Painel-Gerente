@@ -5,14 +5,11 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Créditos - Controle IPTV</title>
     <link rel="stylesheet" href="style.css">
-    <!-- CSS do Toastify -->
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
 </head>
 <body>
     <div class="app-container">
-        <!-- ================================================================== -->
         <!-- MENU LATERAL (Sidebar) -->
-        <!-- ================================================================== -->
         <aside class="sidebar">
             <div class="sidebar-header">
                 <h2>Painel IPTV</h2>
@@ -23,11 +20,9 @@
             </nav>
         </aside>
 
-        <!-- ================================================================== -->
         <!-- CONTEÚDO PRINCIPAL DA PÁGINA -->
-        <!-- ================================================================== -->
         <main class="main-content">
-             <header class="main-header">
+            <header class="main-header">
                 <div class="header-left">
                     <button id="sidebarToggle">☰</button>
                     <h1>Gestão de Créditos</h1>
@@ -40,6 +35,10 @@
                     <h3>Saldo de Créditos</h3>
                     <p id="saldoCreditos">0</p>
                 </div>
+                <div class="dashboard-card">
+                    <h3>Comprados no Mês</h3>
+                    <p id="creditosCompradosMes">0</p>
+                </div>
             </div>
 
             <div class="content-wrapper">
@@ -47,35 +46,40 @@
                     <h3>Registrar Nova Compra de Créditos</h3>
                     <form id="addCreditosForm">
                         <input type="number" id="quantidadeCreditos" placeholder="Quantidade Comprada" min="1" required>
+                        <input type="date" id="dataCompra" required>
                         <button type="submit">Adicionar ao Saldo</button>
                     </form>
                 </div>
 
                 <div class="table-container">
-                    <h2>Histórico de Compras</h2>
+                    <div class="header-com-botao">
+                        <h2>Histórico de Compras</h2>
+                        <input type="month" id="filtroMes" class="filtro-mes">
+                    </div>
                     <table id="comprasTable">
                         <thead>
                             <tr>
                                 <th>Data da Compra</th>
                                 <th>Quantidade</th>
+                                <th>Ações</th>
                             </tr>
                         </thead>
-                        <tbody id="comprasTbody">
-                            <!-- Histórico de compras será inserido aqui -->
-                        </tbody>
+                        <tbody id="comprasTbody"></tbody>
                     </table>
+                     <div class="table-footer">
+                        <span id="pageInfo"></span>
+                        <div id="paginationControls" class="pagination-controls"></div>
+                    </div>
                 </div>
             </div>
         </main>
     </div>
 
-    <!-- JS do Toastify (adicionar ANTES dos scripts do Firebase) -->
+    <!-- Scripts -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
-    <!-- Scripts do Firebase -->
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
-    <!-- Configuração e Inicialização do Firebase -->
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyAofUVwbWRjmxoIMi2gXmJgpsL5M7rGqic",
@@ -87,7 +91,6 @@
       };
       firebase.initializeApp(firebaseConfig);
     </script>
-    <!-- Seu Script Principal (por último) -->
     <script src="script.js"></script>
 </body>
 </html>

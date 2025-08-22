@@ -30,35 +30,33 @@
                 <button id="logoutButton">Sair</button>
             </header>
 
-            <!-- DASHBOARD ATUALIZADO COM MÉTRICAS FINANCEIRAS -->
-        <div class="dashboard-container">
-            <div class="dashboard-card">
-                <h3>👥 Total de Clientes</h3>
-                <p id="totalClientes">0</p>
+            <!-- DASHBOARD -->
+            <div class="dashboard-container">
+                <div class="dashboard-card">
+                    <h3>👥 Total de Clientes</h3>
+                    <p id="totalClientes">0</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>✔ Total Recebido</h3>
+                    <p id="totalRecebido">R$ 0,00</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>💰 Lucro Realizado</h3>
+                    <p id="lucroRealizado">R$ 0,00</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>❗ Total Atrasado</h3>
+                    <p id="totalAtrasado">R$ 0,00</p>
+                </div>
+                <div class="dashboard-card">
+                    <h3>... Pendente a Vencer</h3>
+                    <p id="totalPendente">R$ 0,00</p>
+                </div>
+                 <div class="dashboard-card">
+                    <h3>💸 Custo (Créditos Usados)</h3>
+                    <p id="custoCreditos">R$ 0,00</p>
+                </div>
             </div>
-            <div class="dashboard-card">
-                <h3>✔ Total Recebido (Faturamento)</h3>
-                <p id="totalRecebido">R$ 0,00</p>
-            </div>
-            <div class="dashboard-card">
-                <h3>💸 Custo (Créditos Usados)</h3>
-                <p id="custoCreditos">R$ 0,00</p>
-            </div>
-            <div class="dashboard-card">
-                <h3>📈 Lucro Realizado</h3>
-                <p id="lucroRealizado">R$ 0,00</p>
-            </div>
-            <div class="dashboard-card">
-                <h3>❗ Total Atrasado</h3>
-                <p id="totalAtrasado">R$ 0,00</p>
-            </div>
-             <div class="dashboard-card">
-                <h3>... Pendente a Vencer</h3>
-                <p id="totalPendente">R$ 0,00</p>
-            </div>
-        </div>
-        <!-- FIM DO DASHBOARD -->
-
             
             <div class="form-container">
                 <h3>Adicionar Novo Cliente</h3>
@@ -100,6 +98,11 @@
                     </thead>
                     <tbody id="clientesTbody"></tbody>
                 </table>
+                <!-- RODAPÉ DA TABELA COM PAGINAÇÃO -->
+                <div class="table-footer">
+                    <span id="pageInfo"></span>
+                    <div id="paginationControls" class="pagination-controls"></div>
+                </div>
             </div>
         </main>
     </div>

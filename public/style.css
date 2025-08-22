@@ -40,7 +40,7 @@ body {
     color: #555;
 }
 
-.input-group input, #addClienteForm select {
+.input-group input, #addClienteForm select, #addCreditosForm input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
@@ -91,7 +91,6 @@ button:hover {
     z-index: 1000;
 }
 
-/* Estado do sidebar quando estiver escondido */
 .sidebar.collapsed {
     margin-left: -240px;
 }
@@ -132,7 +131,6 @@ button:hover {
     transition: margin-left 0.3s ease-in-out, width 0.3s ease-in-out; /* Animação suave */
 }
 
-/* Estado do conteúdo principal quando o sidebar estiver escondido */
 .main-content.expanded {
     margin-left: 0;
     width: 100%;
@@ -149,13 +147,11 @@ button:hover {
     margin-bottom: 20px;
 }
 
-/* Container para o botão e o título */
 .header-left {
     display: flex;
     align-items: center;
 }
 
-/* Estilo para o botão de toggle */
 #sidebarToggle {
     width: auto;
     padding: 5px 10px;
@@ -196,6 +192,7 @@ button:hover {
     margin-bottom: 20px;
 }
 
+/* Formulário de Adicionar Cliente */
 #addClienteForm {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
@@ -204,6 +201,18 @@ button:hover {
 
 #addClienteForm button {
     grid-column: 1 / -1;
+}
+
+/* Estilo específico para o formulário de Adicionar Créditos */
+#addCreditosForm {
+    display: grid;
+    grid-template-columns: 1fr 1fr auto;
+    gap: 15px;
+    align-items: flex-end;
+}
+
+#addCreditosForm input {
+    padding: 11px;
 }
 
 .search-container {
@@ -227,6 +236,7 @@ th, td {
     padding: 12px;
     border-bottom: 1px solid #ddd;
     text-align: left;
+    vertical-align: middle; /* Alinha o conteúdo verticalmente */
 }
 
 th {
@@ -241,10 +251,18 @@ tr:last-child td {
 .status-pendente { color: #ffc107; font-weight: bold; }
 .status-atrasado { color: #dc3545; font-weight: bold; }
 
+/* CORREÇÃO: Estilos para a célula de botões com Flexbox */
+td.action-buttons {
+    display: flex;
+    justify-content: flex-end; /* Alinha os botões à direita */
+    align-items: center; /* Centraliza verticalmente */
+    gap: 5px; /* Espaçamento entre os botões */
+}
+
 .action-buttons button {
     width: auto;
     padding: 5px 10px;
-    margin-right: 5px;
+    margin-left: 0; /* Remove a margem antiga */
     font-size: 14px;
 }
 .action-buttons .btn-edit { background-color: #17a2b8; }
@@ -289,4 +307,50 @@ tr:last-child td {
     font-size: 24px;
     font-weight: bold;
     color: #343a42;
+}
+
+.filtro-mes {
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+}
+
+.table-footer {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding-top: 15px;
+    font-size: 14px;
+    color: #6c757d;
+    border-top: 1px solid #dee2e6;
+    margin-top: -8px;
+    padding: 20px;
+
+}
+
+.pagination-controls button {
+    width: auto;
+    padding: 8px 12px;
+    margin: 0 2px;
+    background-color: white;
+    color: #007bff;
+    border: 1px solid #dee2e6;
+    cursor: pointer;
+    font-size: 14px;
+}
+
+.pagination-controls button:hover {
+    background-color: #f8f9fa;
+}
+
+.pagination-controls button.active {
+    background-color: #007bff;
+    color: white;
+    border-color: #007bff;
+}
+
+.pagination-controls button:disabled {
+    color: #6c757d;
+    cursor: not-allowed;
+    background-color: #f8f9fa;
 }
