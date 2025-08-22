@@ -6,6 +6,8 @@
     <title>Clientes - Controle IPTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- LINK PARA OS ÍCONES (Font Awesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <div class="app-container">
@@ -15,8 +17,8 @@
                 <h2>Painel IPTV</h2>
             </div>
             <nav class="sidebar-nav">
-                <a href="gerenciador.html" class="active">Clientes</a>
-                <a href="creditos.html">Créditos</a>
+                <a href="gerenciador.html" class="active"><i class="fas fa-users"></i> Clientes</a>
+                <a href="creditos.html"><i class="fas fa-coins"></i> Créditos</a>
             </nav>
         </aside>
 
@@ -24,42 +26,42 @@
         <main class="main-content">
             <header class="main-header">
                 <div class="header-left">
-                    <button id="sidebarToggle">☰</button>
+                    <button id="sidebarToggle"><i class="fas fa-bars"></i></button>
                     <h1>Painel de Controle de Clientes</h1>
                 </div>
-                <button id="logoutButton">Sair</button>
+                <button id="logoutButton"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </header>
 
-            <!-- DASHBOARD -->
+            <!-- DASHBOARD COMPLETO -->
             <div class="dashboard-container">
                 <div class="dashboard-card">
-                    <h3>👥 Total de Clientes</h3>
+                    <h3><i class="fas fa-users"></i> Total de Clientes</h3>
                     <p id="totalClientes">0</p>
                 </div>
                 <div class="dashboard-card">
-                    <h3>✔ Total Recebido</h3>
+                    <h3><i class="fas fa-check-circle"></i> Total Recebido</h3>
                     <p id="totalRecebido">R$ 0,00</p>
                 </div>
                 <div class="dashboard-card">
-                    <h3>💰 Lucro Realizado</h3>
+                    <h3><i class="fas fa-chart-line"></i> Lucro Realizado</h3>
                     <p id="lucroRealizado">R$ 0,00</p>
                 </div>
                 <div class="dashboard-card">
-                    <h3>❗ Total Atrasado</h3>
+                    <h3><i class="fas fa-exclamation-triangle"></i> Total Atrasado</h3>
                     <p id="totalAtrasado">R$ 0,00</p>
                 </div>
                 <div class="dashboard-card">
-                    <h3>... Pendente a Vencer</h3>
+                    <h3><i class="fas fa-hourglass-half"></i> Pendente a Vencer</h3>
                     <p id="totalPendente">R$ 0,00</p>
                 </div>
                  <div class="dashboard-card">
-                    <h3>💸 Custo (Créditos Usados)</h3>
+                    <h3><i class="fas fa-file-invoice-dollar"></i> Custo (Créditos Usados)</h3>
                     <p id="custoCreditos">R$ 0,00</p>
                 </div>
             </div>
             
             <div class="form-container">
-                <h3>Adicionar Novo Cliente</h3>
+                <h3><i class="fas fa-user-plus"></i> Adicionar Novo Cliente</h3>
                 <form id="addClienteForm">
                     <input type="text" id="nomeCliente" placeholder="Nome do Cliente" required>
                     <input type="text" id="clienteLogin" placeholder="Login do Cliente">
@@ -75,7 +77,7 @@
                         <option value="Pago">Pago</option>
                         <option value="Atrasado">Atrasado</option>
                     </select>
-                    <button type="submit">Adicionar Cliente</button>
+                    <button type="submit"><i class="fas fa-plus-circle"></i> Adicionar Cliente</button>
                 </form>
             </div>
             
@@ -111,6 +113,53 @@
                 </div>
             </div>
         </main>
+    </div>
+
+    <!-- MODAL DE EDIÇÃO -->
+    <div id="editModal" class="modal-background">
+        <div class="modal-content">
+            <span id="closeModal" class="modal-fechar">&times;</span>
+            <h2>Editar Cliente</h2>
+            <form id="editForm">
+                <input type="hidden" id="editClienteId">
+                <div class="input-group">
+                    <label for="editNomeCliente">Nome</label>
+                    <input type="text" id="editNomeCliente" required>
+                </div>
+                <div class="input-group">
+                    <label for="editClienteLogin">Login do Cliente</label>
+                    <input type="text" id="editClienteLogin">
+                </div>
+                <div class="input-group">
+                    <label for="editClientePlano">Plano</label>
+                    <select id="editClientePlano" required>
+                        <option value="Mensal">Mensal</option>
+                        <option value="Trimestral">Trimestral</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="editValor">Valor (R$)</label>
+                    <input type="number" id="editValor" min="0" required>
+                </div>
+                <div class="input-group">
+                    <label for="editDataVencimento">Data de Vencimento</label>
+                    <input type="date" id="editDataVencimento" required>
+                </div>
+                <div class="input-group">
+                    <label for="editStatusPagamento">Status</label>
+                    <select id="editStatusPagamento">
+                        <option value="Pendente">Pendente</option>
+                        <option value="Pago">Pago</option>
+                        <option value="Atrasado">Atrasado</option>
+                    </select>
+                </div>
+                <div class="input-group">
+                    <label for="editComprovante">Subir Novo Comprovante (opcional)</label>
+                    <input type="file" id="editComprovante" class="input-file">
+                </div>
+                <button type="submit">Salvar Alterações</button>
+            </form>
+        </div>
     </div>
 
     <!-- Scripts -->

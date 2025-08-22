@@ -6,6 +6,8 @@
     <title>Créditos - Controle IPTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
+    <!-- LINK PARA OS ÍCONES (Font Awesome) -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
 </head>
 <body>
     <div class="app-container">
@@ -15,8 +17,8 @@
                 <h2>Painel IPTV</h2>
             </div>
             <nav class="sidebar-nav">
-                <a href="gerenciador.html">Clientes</a>
-                <a href="creditos.html" class="active">Créditos</a>
+                <a href="gerenciador.html"><i class="fas fa-users"></i> Clientes</a>
+                <a href="creditos.html" class="active"><i class="fas fa-coins"></i> Créditos</a>
             </nav>
         </aside>
 
@@ -24,30 +26,30 @@
         <main class="main-content">
             <header class="main-header">
                 <div class="header-left">
-                    <button id="sidebarToggle">☰</button>
+                    <button id="sidebarToggle"><i class="fas fa-bars"></i></button>
                     <h1>Gestão de Créditos</h1>
                 </div>
-                <button id="logoutButton">Sair</button>
+                <button id="logoutButton"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </header>
 
             <div class="dashboard-container">
                 <div class="dashboard-card">
-                    <h3>Saldo de Créditos</h3>
+                    <h3><i class="fas fa-wallet"></i> Saldo de Créditos</h3>
                     <p id="saldoCreditos">0</p>
                 </div>
                 <div class="dashboard-card">
-                    <h3>Comprados no Mês</h3>
+                    <h3><i class="fas fa-calendar-check"></i> Comprados no Mês</h3>
                     <p id="creditosCompradosMes">0</p>
                 </div>
             </div>
 
             <div class="content-wrapper">
                 <div class="form-container">
-                    <h3>Registrar Nova Compra de Créditos</h3>
+                    <h3><i class="fas fa-cart-plus"></i> Registrar Nova Compra de Créditos</h3>
                     <form id="addCreditosForm">
                         <input type="number" id="quantidadeCreditos" placeholder="Quantidade Comprada" min="1" required>
                         <input type="date" id="dataCompra" required>
-                        <button type="submit">Adicionar ao Saldo</button>
+                        <button type="submit"><i class="fas fa-plus-circle"></i> Adicionar ao Saldo</button>
                     </form>
                 </div>
 
@@ -80,6 +82,7 @@
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-firestore.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-storage.js"></script>
     <script>
       const firebaseConfig = {
         apiKey: "AIzaSyAofUVwbWRjmxoIMi2gXmJgpsL5M7rGqic",

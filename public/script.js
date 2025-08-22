@@ -126,7 +126,7 @@ function handleCreditosPage(auth, db) {
                 tr.dataset.id = compra.id;
                 tr.dataset.quantidade = compra.quantidade;
                 const dataCompra = compra.data.toDate().toLocaleDateString('pt-BR');
-                tr.innerHTML = `<td>${dataCompra}</td><td>${compra.quantidade}</td><td class="action-buttons"><button class="btn-edit">Editar</button><button class="btn-delete">Excluir</button></td>`;
+                tr.innerHTML = `<td>${dataCompra}</td><td>${compra.quantidade}</td><td class="action-buttons"><button class="btn-edit"><i class="fas fa-pencil-alt"></i> Editar</button><button class="btn-delete"><i class="fas fa-trash-alt"></i> Excluir</button></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -154,7 +154,8 @@ function handleCreditosPage(auth, db) {
     });
 
     document.getElementById('comprasTbody').addEventListener('click', (e) => {
-        const target = e.target;
+        const target = e.target.closest('button');
+        if (!target) return;
         const tr = target.closest('tr');
         if (!tr || !tr.dataset.id) return;
         
@@ -178,7 +179,7 @@ function handleCreditosPage(auth, db) {
 
         if (target.classList.contains('btn-edit')) {
             const cells = tr.querySelectorAll('td');
-            tr.innerHTML = `<td>${cells[0].textContent}</td><td><input type="number" value="${quantidadeOriginal}" style="width: 80px;"></td><td class="action-buttons"><button class="btn-save">Salvar</button></td>`;
+            tr.innerHTML = `<td>${cells[0].textContent}</td><td><input type="number" value="${quantidadeOriginal}" style="width: 80px;"></td><td class="action-buttons"><button class="btn-save"><i class="fas fa-save"></i> Salvar</button></td>`;
         }
 
         if (target.classList.contains('btn-save')) {
@@ -321,16 +322,25 @@ function handleGerenciadorPage(auth, db, storage) {
             let statusClass = '';
             if (dataVencimentoObj < hoje && cliente.status !== 'Pago') {
                 statusExibido = 'Atrasado';
+                tr.classList.add('vencimento-atrasado');
+            } else {
+                const diffTime = dataVencimentoObj - hoje;
+                const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
+                if (diffDays >= 0 && diffDays <= 5 && cliente.status !== 'Pago') {
+                    tr.classList.add('vencimento-proximo');
+                }
             }
             if (statusExibido === 'Pago') statusClass = 'status-pago';
             else if (statusExibido === 'Pendente') statusClass = 'status-pendente';
             else if (statusExibido === 'Atrasado') statusClass = 'status-atrasado';
+            
             let botoesAcao = '';
             if (statusExibido === 'Atrasado' || statusExibido === 'Pendente') {
-                botoesAcao = `<button class="btn-confirmar">Confirmar Pagamento</button>`;
+                botoesAcao = `<button class="btn-confirmar"><i class="fas fa-check"></i> Confirmar Pagamento</button>`;
             } else {
-                botoesAcao = `<button class="btn-edit">Editar</button><button class="btn-delete">Excluir</button>`;
+                botoesAcao = `<button class="btn-edit"><i class="fas fa-pencil-alt"></i> Editar</button><button class="btn-delete"><i class="fas fa-trash-alt"></i> Excluir</button>`;
             }
+
             let comprovanteHtml = 'N/A';
             if (cliente.comprovanteURL) {
                 comprovanteHtml = `<a href="${cliente.comprovanteURL}" target="_blank" class="link-comprovante">Ver</a>`;
@@ -357,7 +367,8 @@ function handleGerenciadorPage(auth, db, storage) {
     });
 
     clientesTbody.addEventListener('click', (e) => {
-        const target = e.target;
+        const target = e.target.closest('button');
+        if (!target) return;
         const tr = target.closest('tr');
         if (!tr || !tr.dataset.id) return;
         const clienteId = tr.dataset.id;
@@ -395,43 +406,60 @@ function handleGerenciadorPage(auth, db, storage) {
             }
         }
         
-        if (target.classList.contains('btn-save')) {
-            const inputs = tr.querySelectorAll('input, select');
-            const fileInput = tr.querySelector('input[type="file"]');
-            const file = fileInput && fileInput.files[0] ? fileInput.files[0] : null;
-            const clienteAtualizado = {
-                nome: inputs[0].value, loginCliente: inputs[1].value, plano: inputs[2].value,
-                valor: parseFloat(inputs[3].value), vencimento: inputs[4].value, status: inputs[5].value
-            };
-            const saveUpdates = (comprovanteURL = null) => {
-                if(comprovanteURL) {
-                    clienteAtualizado.comprovanteURL = comprovanteURL;
-                }
-                clientesCollection.doc(clienteId).update(clienteAtualizado).then(() => {
-                    Toastify({ text: "Cliente atualizado com sucesso!", backgroundColor: "#007bff" }).showToast();
-                    carregarClientes();
-                });
-            };
-            if (file) {
-                const uploadTask = storage.ref(`comprovantes/${clienteId}/${file.name}`).put(file);
-                uploadTask.on('state_changed', null, 
-                    (error) => { console.error("Erro no upload:", error); }, 
-                    () => {
-                        uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
-                            saveUpdates(downloadURL);
-                        });
-                    }
-                );
-            } else {
-                saveUpdates();
-            }
-        }
-
         if (target.classList.contains('btn-edit')) {
-            const cells = tr.querySelectorAll('td');
-            const planoAtual = cells[2].textContent;
-            const dataVencimento = new Date(cells[4].textContent.split('/').reverse().join('-')).toISOString().split('T')[0];
-            tr.innerHTML = `<td><input type="text" value="${cells[0].textContent}"></td><td><input type="text" value="${cells[1].textContent}"></td><td><select><option value="Mensal" ${planoAtual === 'Mensal' ? 'selected' : ''}>Mensal</option><option value="Trimestral" ${planoAtual === 'Trimestral' ? 'selected' : ''}>Trimestral</option></select></td><td><input type="number" value="${cells[3].textContent.replace('R$ ', '')}"></td><td><input type="date" value="${dataVencimento}"></td><td><select><option value="Pendente" ${cells[5].textContent === 'Pendente' ? 'selected' : ''}>Pendente</option><option value="Pago" ${cells[5].textContent === 'Pago' ? 'selected' : ''}>Pago</option><option value="Atrasado" ${cells[5].textContent === 'Atrasado' ? 'selected' : ''}>Atrasado</option></select></td><td><input type="file" class="input-file"></td><td class="action-buttons"><button class="btn-save">Salvar</button></td>`;
+            const cliente = filteredClientes.find(c => c.id === clienteId);
+            if (!cliente) return;
+            document.getElementById('editClienteId').value = cliente.id;
+            document.getElementById('editNomeCliente').value = cliente.nome;
+            document.getElementById('editClienteLogin').value = cliente.loginCliente || '';
+            document.getElementById('editClientePlano').value = cliente.plano;
+            document.getElementById('editValor').value = cliente.valor;
+            document.getElementById('editDataVencimento').value = cliente.vencimento;
+            document.getElementById('editStatusPagamento').value = cliente.status;
+            document.getElementById('editModal').style.display = 'flex';
+        }
+    });
+
+    const editModal = document.getElementById('editModal');
+    const closeModal = document.getElementById('closeModal');
+    const editForm = document.getElementById('editForm');
+
+    closeModal.onclick = () => { editModal.style.display = 'none'; }
+    window.onclick = (event) => { if (event.target == editModal) { editModal.style.display = 'none'; } }
+
+    editForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const clienteId = document.getElementById('editClienteId').value;
+        const fileInput = document.getElementById('editComprovante');
+        const file = fileInput.files[0];
+        const clienteAtualizado = {
+            nome: document.getElementById('editNomeCliente').value, loginCliente: document.getElementById('editClienteLogin').value,
+            plano: document.getElementById('editClientePlano').value, valor: parseFloat(document.getElementById('editValor').value),
+            vencimento: document.getElementById('editDataVencimento').value, status: document.getElementById('editStatusPagamento').value
+        };
+        const saveUpdates = (comprovanteURL = null) => {
+            if(comprovanteURL) {
+                clienteAtualizado.comprovanteURL = comprovanteURL;
+            }
+            clientesCollection.doc(clienteId).update(clienteAtualizado).then(() => {
+                Toastify({ text: "Cliente atualizado com sucesso!", backgroundColor: "#007bff" }).showToast();
+                editModal.style.display = 'none';
+                editForm.reset();
+                carregarClientes();
+            });
+        };
+        if (file) {
+            const uploadTask = storage.ref(`comprovantes/${clienteId}/${file.name}`).put(file);
+            uploadTask.on('state_changed', null, 
+                (error) => { console.error("Erro no upload:", error); }, 
+                () => {
+                    uploadTask.snapshot.ref.getDownloadURL().then(downloadURL => {
+                        saveUpdates(downloadURL);
+                    });
+                }
+            );
+        } else {
+            saveUpdates();
         }
     });
 }
