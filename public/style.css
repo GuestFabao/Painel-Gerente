@@ -329,6 +329,7 @@ td.action-buttons {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
+    margin-bottom: 15px;
 }
 
 .table-footer {
@@ -339,7 +340,7 @@ td.action-buttons {
     font-size: 14px;
     color: #6c757d;
     border-top: 1px solid #dee2e6;
-    margin-top: -20px;
+    margin-top: 0px;
     padding: 20px;
 }
 
@@ -446,4 +447,5 @@ tr:hover td {
 .filtro-extrato {
     display: flex;
     gap: 10px;
-}
+    margin-bottom: 10px;
+}   
