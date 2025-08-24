@@ -9,6 +9,8 @@ document.addEventListener('DOMContentLoaded', () => {
         handleGerenciadorPage(auth, db, storage);
     } else if (document.title.includes('Créditos')) {
         handleCreditosPage(auth, db);
+    } else if (document.title.includes('Configurações')) {
+        handleConfiguracoesPage(auth, db);
     } else if (document.body.contains(document.getElementById('loginForm'))) {
         handleLoginPage(auth);
     }
@@ -63,7 +65,7 @@ function handleLoginPage(auth) {
 }
 
 // ==================================================================
-// FUNÇÃO PARA A PÁGINA DE CRÉDITOS (COM PAGINAÇÃO)
+// FUNÇÃO PARA A PÁGINA DE CRÉDITOS
 // ==================================================================
 function handleCreditosPage(auth, db) {
     auth.onAuthStateChanged(user => { if (!user) { window.location.href = 'index.html'; } });
@@ -126,7 +128,19 @@ function handleCreditosPage(auth, db) {
                 tr.dataset.id = compra.id;
                 tr.dataset.quantidade = compra.quantidade;
                 const dataCompra = compra.data.toDate().toLocaleDateString('pt-BR');
-                tr.innerHTML = `<td>${dataCompra}</td><td>${compra.quantidade}</td><td class="action-buttons"><button class="btn-edit"><i class="fas fa-pencil-alt"></i> Editar</button><button class="btn-delete"><i class="fas fa-trash-alt"></i> Excluir</button></td>`;
+                tr.innerHTML = `
+                    <td>${dataCompra}</td>
+                    <td>${compra.quantidade}</td>
+                    <td class="actions-cell">
+                        <div class="actions-menu-container">
+                            <button class="kebab-button"><i class="fas fa-ellipsis-v"></i></button>
+                            <div class="actions-dropdown">
+                                <a href="#" class="dropdown-item edit btn-edit"><i class="fas fa-pencil-alt"></i> Editar</a>
+                                <a href="#" class="dropdown-item delete btn-delete"><i class="fas fa-trash-alt"></i> Excluir</a>
+                            </div>
+                        </div>
+                    </td>
+                `;
                 tbody.appendChild(tr);
             });
         }
@@ -154,16 +168,25 @@ function handleCreditosPage(auth, db) {
     });
 
     document.getElementById('comprasTbody').addEventListener('click', (e) => {
-        const target = e.target.closest('button');
+        e.preventDefault();
+        const target = e.target.closest('button, a');
         if (!target) return;
+        
+        if (target.classList.contains('kebab-button')) {
+            document.querySelectorAll('.actions-dropdown.show').forEach(dropdown => {
+                if (dropdown !== target.nextElementSibling) dropdown.classList.remove('show');
+            });
+            target.nextElementSibling.classList.toggle('show');
+            return;
+        }
+
         const tr = target.closest('tr');
         if (!tr || !tr.dataset.id) return;
-        
         const compraId = tr.dataset.id;
         const quantidadeOriginal = parseInt(tr.dataset.quantidade);
 
         if (target.classList.contains('btn-delete')) {
-            if (confirm('Tem certeza? Isso irá subtrair os créditos do saldo total.')) {
+            showConfirmModal('Excluir Compra', 'Tem a certeza? Esta ação irá subtrair os créditos do seu saldo total.', () => {
                 db.runTransaction(transaction => {
                     return transaction.get(saldoRef).then(doc => {
                         const saldoAtual = doc.exists ? doc.data().saldo : 0;
@@ -171,15 +194,15 @@ function handleCreditosPage(auth, db) {
                         transaction.delete(comprasCreditoCollection.doc(compraId));
                     });
                 }).then(() => {
-                    Toastify({ text: "Registro excluído!", backgroundColor: "#dc3545" }).showToast();
+                    Toastify({ text: "Registo de compra excluído!", backgroundColor: "#dc3545" }).showToast();
                     carregarDadosCreditos();
                 });
-            }
+            });
         }
 
         if (target.classList.contains('btn-edit')) {
             const cells = tr.querySelectorAll('td');
-            tr.innerHTML = `<td>${cells[0].textContent}</td><td><input type="number" value="${quantidadeOriginal}" style="width: 80px;"></td><td class="action-buttons"><button class="btn-save"><i class="fas fa-save"></i> Salvar</button></td>`;
+            tr.innerHTML = `<td>${cells[0].textContent}</td><td><input type="number" value="${quantidadeOriginal}" style="width: 80px;"></td><td class="actions-cell"><button class="btn-save"><i class="fas fa-save"></i> Salvar</button></td>`;
         }
 
         if (target.classList.contains('btn-save')) {
@@ -199,71 +222,97 @@ function handleCreditosPage(auth, db) {
         }
     });
 
+    window.addEventListener('click', (e) => {
+        if (!e.target.closest('.actions-menu-container')) {
+            document.querySelectorAll('.actions-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+        }
+    });
+
     carregarDadosCreditos();
+}
+
+// ==================================================================
+// FUNÇÃO PARA A PÁGINA DE CONFIGURAÇÕES
+// ==================================================================
+function handleConfiguracoesPage(auth, db) {
+    auth.onAuthStateChanged(user => { if (!user) { window.location.href = 'index.html'; } });
+    const logoutButton = document.getElementById('logoutButton');
+    logoutButton.addEventListener('click', () => { auth.signOut().then(() => { window.location.href = 'index.html'; }); });
+
+    const configRef = db.collection('configuracoes').doc('valores');
+    const configForm = document.getElementById('configForm');
+
+    async function carregarConfiguracoes() {
+        const doc = await configRef.get();
+        if (doc.exists) {
+            const configs = doc.data();
+            document.getElementById('precoMensal').value = configs.precoMensal || 30;
+            document.getElementById('precoTrimestral').value = configs.precoTrimestral || 90;
+            document.getElementById('custoCredito').value = configs.custoCredito || 10;
+        } else {
+            document.getElementById('precoMensal').value = 30;
+            document.getElementById('precoTrimestral').value = 90;
+            document.getElementById('custoCredito').value = 10;
+        }
+    }
+
+    configForm.addEventListener('submit', (e) => {
+        e.preventDefault();
+        const novasConfiguracoes = {
+            precoMensal: parseFloat(document.getElementById('precoMensal').value),
+            precoTrimestral: parseFloat(document.getElementById('precoTrimestral').value),
+            custoCredito: parseFloat(document.getElementById('custoCredito').value)
+        };
+        configRef.set(novasConfiguracoes).then(() => {
+            Toastify({ text: "Configurações salvas com sucesso!", backgroundColor: "#28a745" }).showToast();
+        }).catch(error => {
+            console.error("Erro ao salvar configurações: ", error);
+            Toastify({ text: "Erro ao salvar.", backgroundColor: "#dc3545" }).showToast();
+        });
+    });
+
+    carregarConfiguracoes();
 }
 
 // ==================================================================
 // FUNÇÃO DA PÁGINA DE CLIENTES (FINAL)
 // ==================================================================
-function handleGerenciadorPage(auth, db, storage) {
-    auth.onAuthStateChanged(user => { if (user) { carregarClientes(); } else { window.location.href = 'index.html'; } });
+async function handleGerenciadorPage(auth, db, storage) {
+    const clientesCollection = db.collection('clientes');
+    const saldoRef = db.collection('contabilidade').doc('saldoCreditos');
+    const configRef = db.collection('configuracoes').doc('valores');
     const logoutButton = document.getElementById('logoutButton');
-    logoutButton.addEventListener('click', () => { auth.signOut().then(() => { window.location.href = 'index.html'; }); });
-
     const addClienteForm = document.getElementById('addClienteForm');
     const clientesTbody = document.getElementById('clientesTbody');
     const searchInput = document.getElementById('searchInput');
     const planoSelect = document.getElementById('clientePlano');
     const valorInput = document.getElementById('valor');
-    const valoresPlanos = { 'mensal': 30, 'trimestral': 90 };
-
-    planoSelect.addEventListener('change', () => {
-        const planoSelecionado = planoSelect.value.toLowerCase().trim();
-        if (valoresPlanos[planoSelecionado]) {
-            valorInput.value = valoresPlanos[planoSelecionado];
-        }
-    });
-
-    const clientesCollection = db.collection('clientes');
-    const saldoRef = db.collection('contabilidade').doc('saldoCreditos');
-
     const filtroMesExtrato = document.getElementById('filtroMesExtrato');
     const btnDownloadExtrato = document.getElementById('btnDownloadExtrato');
-    const hojeFiltro = new Date();
-    filtroMesExtrato.value = `${hojeFiltro.getFullYear()}-${(hojeFiltro.getMonth() + 1).toString().padStart(2, '0')}`;
-
-    btnDownloadExtrato.addEventListener('click', async () => {
-        const filtro = filtroMesExtrato.value;
-        if (!filtro) return alert('Selecione um mês para o extrato.');
-        const [ano, mes] = filtro.split('-').map(Number);
-        const inicioMes = new Date(ano, mes - 1, 1);
-        const fimMes = new Date(ano, mes, 0, 23, 59, 59);
-        const snapshot = await clientesCollection.where('dataPagamento', '>=', inicioMes).where('dataPagamento', '<=', fimMes).get();
-        if (snapshot.empty) return Toastify({ text: "Nenhum pagamento neste mês.", backgroundColor: "#ffc107" }).showToast();
-        let csvContent = "data:text/csv;charset=utf-8,Nome;Plano;Valor;Data do Pagamento\n";
-        snapshot.forEach(doc => {
-            const cliente = doc.data();
-            const dataPag = cliente.dataPagamento.toDate().toLocaleDateString('pt-BR');
-            csvContent += `${cliente.nome};${cliente.plano};${cliente.valor};${dataPag}\n`;
-        });
-        const link = document.createElement("a");
-        link.setAttribute("href", encodeURI(csvContent));
-        link.setAttribute("download", `extrato_${filtro}.csv`);
-        document.body.appendChild(link);
-        link.click();
-        document.body.removeChild(link);
-    });
-
+    const editModal = document.getElementById('editModal');
+    const closeModal = document.getElementById('closeModal');
+    const editForm = document.getElementById('editForm');
+    const historyModal = document.getElementById('historyModal');
+    const closeHistoryModal = document.getElementById('closeHistoryModal');
+    
     let allClientes = [];
     let filteredClientes = [];
     let currentPage = 1;
     const rowsPerPage = 10;
+    let configs = { precoMensal: 30, precoTrimestral: 90, custoCredito: 10 };
 
-    searchInput.addEventListener('keyup', () => {
-        const searchTerm = searchInput.value.toLowerCase();
-        filteredClientes = allClientes.filter(cliente => cliente.nome.toLowerCase().includes(searchTerm));
-        currentPage = 1;
-        displayClientesPage(currentPage);
+    auth.onAuthStateChanged(async (user) => { 
+        if (user) { 
+            const configDoc = await configRef.get();
+            if (configDoc.exists) {
+                configs = configDoc.data();
+            }
+            await carregarClientes();
+        } else { 
+            window.location.href = 'index.html'; 
+        } 
     });
 
     async function carregarClientes() {
@@ -299,7 +348,7 @@ function handleGerenciadorPage(auth, db, storage) {
                 if (cliente.valor) totalAtrasado += parseFloat(cliente.valor);
             }
         });
-        const custoCreditosUsados = clientesPagos * 10;
+        const custoCreditosUsados = clientesPagos * configs.custoCredito;
         const lucroRealizado = totalRecebido - custoCreditosUsados;
         document.getElementById('totalClientes').textContent = allClientes.length;
         document.getElementById('totalRecebido').textContent = `R$ ${totalRecebido.toFixed(2)}`;
@@ -338,7 +387,16 @@ function handleGerenciadorPage(auth, db, storage) {
             if (statusExibido === 'Atrasado' || statusExibido === 'Pendente') {
                 botoesAcao = `<button class="btn-confirmar"><i class="fas fa-check"></i> Confirmar Pagamento</button>`;
             } else {
-                botoesAcao = `<button class="btn-edit"><i class="fas fa-pencil-alt"></i> Editar</button><button class="btn-delete"><i class="fas fa-trash-alt"></i> Excluir</button>`;
+                botoesAcao = `
+                    <div class="actions-menu-container">
+                        <button class="kebab-button"><i class="fas fa-ellipsis-v"></i></button>
+                        <div class="actions-dropdown">
+                            <a href="#" class="dropdown-item history btn-history"><i class="fas fa-history"></i> Histórico</a>
+                            <a href="#" class="dropdown-item edit btn-edit"><i class="fas fa-pencil-alt"></i> Editar</a>
+                            <a href="#" class="dropdown-item delete btn-delete"><i class="fas fa-trash-alt"></i> Excluir</a>
+                        </div>
+                    </div>
+                `;
             }
 
             let comprovanteHtml = 'N/A';
@@ -346,11 +404,21 @@ function handleGerenciadorPage(auth, db, storage) {
                 comprovanteHtml = `<a href="${cliente.comprovanteURL}" target="_blank" class="link-comprovante">Ver</a>`;
             }
             const dataVencimentoFormatada = dataVencimentoObj.toLocaleDateString("pt-BR", { timeZone: 'UTC' });
-            tr.innerHTML = `<td>${cliente.nome}</td><td>${cliente.loginCliente || ''}</td><td>${cliente.plano || ''}</td><td>R$ ${cliente.valor}</td><td>${dataVencimentoFormatada}</td><td class="${statusClass}">${statusExibido}</td><td>${comprovanteHtml}</td><td class="action-buttons">${botoesAcao}</td>`;
+            tr.innerHTML = `<td>${cliente.nome}</td><td>${cliente.loginCliente || ''}</td><td>${cliente.plano || ''}</td><td>R$ ${cliente.valor}</td><td>${dataVencimentoFormatada}</td><td class="${statusClass}">${statusExibido}</td><td>${comprovanteHtml}</td><td class="actions-cell">${botoesAcao}</td>`;
             tbody.appendChild(tr);
         });
         setupPagination(filteredClientes.length, document.getElementById('paginationControls'), displayClientesPage, document.getElementById('pageInfo'));
     }
+    
+    logoutButton.addEventListener('click', () => { auth.signOut().then(() => { window.location.href = 'index.html'; }); });
+
+    planoSelect.addEventListener('change', () => {
+        const valoresPlanos = { 'mensal': configs.precoMensal, 'trimestral': configs.precoTrimestral };
+        const planoSelecionado = planoSelect.value.toLowerCase().trim();
+        if (valoresPlanos[planoSelecionado]) {
+            valorInput.value = valoresPlanos[planoSelecionado];
+        }
+    });
     
     addClienteForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -366,15 +434,48 @@ function handleGerenciadorPage(auth, db, storage) {
         });
     });
 
-    clientesTbody.addEventListener('click', (e) => {
-        const target = e.target.closest('button');
+    clientesTbody.addEventListener('click', async (e) => {
+        e.preventDefault();
+        const target = e.target.closest('button, a');
         if (!target) return;
+
+        if (target.classList.contains('kebab-button')) {
+            document.querySelectorAll('.actions-dropdown.show').forEach(dropdown => {
+                if (dropdown !== target.nextElementSibling) dropdown.classList.remove('show');
+            });
+            target.nextElementSibling.classList.toggle('show');
+            return;
+        }
+        
         const tr = target.closest('tr');
         if (!tr || !tr.dataset.id) return;
         const clienteId = tr.dataset.id;
 
+        if (target.classList.contains('btn-history')) {
+            const cliente = filteredClientes.find(c => c.id === clienteId);
+            document.getElementById('historyModalClientName').textContent = cliente.nome;
+            const historyTbody = document.getElementById('historyTbody');
+            historyTbody.innerHTML = '<tr><td colspan="3">A carregar histórico...</td></tr>';
+            historyModal.style.display = 'flex';
+            const pagamentosRef = db.collection('clientes').doc(clienteId).collection('historicoPagamentos').orderBy('dataPagamento', 'desc');
+            const snapshot = await pagamentosRef.get();
+            if (snapshot.empty) {
+                historyTbody.innerHTML = '<tr><td colspan="3">Nenhum pagamento registado.</td></tr>';
+            } else {
+                historyTbody.innerHTML = '';
+                snapshot.forEach(doc => {
+                    const pagamento = doc.data();
+                    const trHist = document.createElement('tr');
+                    trHist.innerHTML = `<td>${pagamento.dataPagamento.toDate().toLocaleDateString('pt-BR')}</td><td>${pagamento.plano}</td><td>R$ ${pagamento.valor.toFixed(2)}</td>`;
+                    historyTbody.appendChild(trHist);
+                });
+            }
+        }
+
         if (target.classList.contains('btn-confirmar')) {
             const planoCliente = tr.dataset.plano;
+            const clienteDoc = await clientesCollection.doc(clienteId).get();
+            const valorCliente = clienteDoc.data().valor;
             db.runTransaction(transaction => {
                 return transaction.get(saldoRef).then(doc => {
                     const saldoAtual = doc.exists ? doc.data().saldo : 0;
@@ -386,8 +487,10 @@ function handleGerenciadorPage(auth, db, storage) {
                     } else if (planoCliente.toLowerCase().trim() === 'trimestral') {
                         novaDataVencimento.setMonth(novaDataVencimento.getMonth() + 3);
                     }
-                    const dadosCliente = { status: 'Pago', vencimento: novaDataVencimento.toISOString().split('T')[0], dataPagamento: new Date() };
+                    const dadosCliente = { status: 'Pago', vencimento: novaDataVencimento.toISOString().split('T')[0] };
                     transaction.update(clientesCollection.doc(clienteId), dadosCliente);
+                    const novoPagamentoRef = clientesCollection.doc(clienteId).collection('historicoPagamentos').doc();
+                    transaction.set(novoPagamentoRef, { dataPagamento: new Date(), valor: valorCliente, plano: planoCliente });
                 });
             }).then(() => {
                 Toastify({ text: "Pagamento confirmado! 1 crédito utilizado.", backgroundColor: "#28a745" }).showToast();
@@ -398,12 +501,12 @@ function handleGerenciadorPage(auth, db, storage) {
         }
         
         if (target.classList.contains('btn-delete')) {
-            if (confirm('Tem certeza?')) {
+            showConfirmModal('Excluir Cliente', 'Tem a certeza de que deseja excluir este cliente permanentemente?', () => {
                 clientesCollection.doc(clienteId).delete().then(() => {
                     Toastify({ text: "Cliente excluído!", backgroundColor: "#dc3545" }).showToast();
                     carregarClientes();
                 });
-            }
+            });
         }
         
         if (target.classList.contains('btn-edit')) {
@@ -416,16 +519,21 @@ function handleGerenciadorPage(auth, db, storage) {
             document.getElementById('editValor').value = cliente.valor;
             document.getElementById('editDataVencimento').value = cliente.vencimento;
             document.getElementById('editStatusPagamento').value = cliente.status;
-            document.getElementById('editModal').style.display = 'flex';
+            editModal.style.display = 'flex';
         }
     });
 
-    const editModal = document.getElementById('editModal');
-    const closeModal = document.getElementById('closeModal');
-    const editForm = document.getElementById('editForm');
-
     closeModal.onclick = () => { editModal.style.display = 'none'; }
-    window.onclick = (event) => { if (event.target == editModal) { editModal.style.display = 'none'; } }
+    window.onclick = (event) => { 
+        if (event.target == editModal) { editModal.style.display = 'none'; }
+        if (event.target == historyModal) { historyModal.style.display = 'none'; }
+        if (!event.target.closest('.actions-menu-container')) {
+            document.querySelectorAll('.actions-dropdown.show').forEach(dropdown => {
+                dropdown.classList.remove('show');
+            });
+        }
+    }
+    closeHistoryModal.onclick = () => { historyModal.style.display = 'none'; }
 
     editForm.addEventListener('submit', (e) => {
         e.preventDefault();
@@ -462,6 +570,37 @@ function handleGerenciadorPage(auth, db, storage) {
             saveUpdates();
         }
     });
+}
+
+// ==================================================================
+// FUNÇÃO GENÉRICA PARA O MODAL DE CONFIRMAÇÃO
+// ==================================================================
+function showConfirmModal(title, message, onConfirm) {
+    const confirmModal = document.getElementById('confirmModal');
+    document.getElementById('confirmModalTitle').textContent = title;
+    document.getElementById('confirmModalMessage').textContent = message;
+    confirmModal.style.display = 'flex';
+
+    const confirmButton = document.getElementById('confirmButton');
+    const cancelButton = document.getElementById('cancelButton');
+
+    const confirmHandler = () => {
+        onConfirm();
+        hide();
+    };
+
+    const hide = () => {
+        confirmModal.style.display = 'none';
+        confirmButton.removeEventListener('click', confirmHandler);
+    };
+
+    confirmButton.addEventListener('click', confirmHandler);
+    cancelButton.addEventListener('click', hide);
+    window.addEventListener('click', (event) => {
+        if (event.target == confirmModal) {
+            hide();
+        }
+    }, { once: true });
 }
 
 // ==================================================================
@@ -536,4 +675,17 @@ function setupPagination(totalItems, wrapper, displayFunction, infoWrapper) {
         displayFunction(currentPage + 1);
     });
     wrapper.appendChild(nextButton);
+}
+
+// ==================================================================
+// REGISTO DO SERVICE WORKER
+// ==================================================================
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js').then(registration => {
+      console.log('Service Worker registado com sucesso:', registration.scope);
+    }).catch(error => {
+      console.log('Falha no registo do Service Worker:', error);
+    });
+  });
 }

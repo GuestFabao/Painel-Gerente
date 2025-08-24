@@ -1,11 +1,13 @@
 /* --- ESTILOS GERAIS E DE LOGIN --- */
 
+/* Estilo geral para páginas com sidebar (não centralizado) */
 body {
     background-color: #f0f2f5;
     font-family: Arial, sans-serif;
     margin: 0;
 }
 
+/* Estilo específico para centralizar APENAS a página de login */
 .login-body {
     display: flex;
     justify-content: center;
@@ -38,7 +40,7 @@ body {
     color: #555;
 }
 
-.input-group input, #addClienteForm select, #addCreditosForm input {
+.input-group input, #addClienteForm select, #addCreditosForm input, #configForm input {
     width: 100%;
     padding: 10px;
     border: 1px solid #ddd;
@@ -57,7 +59,6 @@ button {
     font-size: 16px;
     cursor: pointer;
     transition: background-color 0.3s;
-    /* CORREÇÃO: Alinha ícones dentro dos botões */
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -109,7 +110,6 @@ button:hover {
     font-size: 22px;
 }
 
-/* CORREÇÃO: Alinha ícones nos links do menu */
 .sidebar-nav a {
     display: flex;
     align-items: center;
@@ -166,7 +166,7 @@ button:hover {
     background-color: #f8f9fa;
     color: #333;
     border: 1px solid #ddd;
-    gap: 0; /* Remove gap do ícone */
+    gap: 0;
 }
 
 #sidebarToggle:hover {
@@ -203,6 +203,7 @@ button:hover {
     display: flex;
     align-items: center;
     gap: 8px;
+    margin-top: 0;
 }
 
 #addClienteForm {
@@ -262,25 +263,69 @@ tr:last-child td {
 .status-pendente { color: #ffc107; font-weight: bold; }
 .status-atrasado { color: #dc3545; font-weight: bold; }
 
-td.action-buttons {
-    display: flex;
-    justify-content: flex-end;
-    align-items: center;
-    gap: 5px;
+td.actions-cell {
+    position: relative;
+    text-align: right;
 }
 
-.action-buttons button {
+.actions-menu-container {
+    display: inline-block;
+    position: relative;
+}
+
+.kebab-button {
     width: auto;
     padding: 5px 10px;
-    margin-left: 0;
-    font-size: 14px;
+    background-color: #6c757d;
+    border: none;
+    color: white;
+    border-radius: 4px;
+    cursor: pointer;
+    gap: 0;
 }
-.action-buttons .btn-edit { background-color: #17a2b8; }
-.action-buttons .btn-edit:hover { background-color: #138496; }
-.action-buttons .btn-delete { background-color: #dc3545; }
-.action-buttons .btn-delete:hover { background-color: #c82333; }
-.action-buttons .btn-save { background-color: #007bff; }
-.action-buttons .btn-save:hover { background-color: #0069d9; }
+.kebab-button:hover {
+    background-color: #5a6268;
+}
+
+.actions-dropdown {
+    display: none;
+    position: absolute;
+    right: 0;
+    top: 35px;
+    background-color: white;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    z-index: 100;
+    width: 150px;
+    overflow: hidden;
+}
+
+.actions-dropdown.show {
+    display: block;
+}
+
+.dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 10px 15px;
+    color: #333;
+    text-decoration: none;
+    font-size: 14px;
+    background-color: white;
+    width: 100%;
+    border: none;
+    text-align: left;
+}
+.dropdown-item:hover {
+    background-color: #f8f9fa;
+}
+
+.dropdown-item.edit { color: #17a2b8; }
+.dropdown-item.delete { color: #dc3545; }
+.dropdown-item.history { color: #007bff; }
+
 
 .btn-confirmar {
     background-color: #28a745;
@@ -299,14 +344,13 @@ td.action-buttons {
 }
 
 .dashboard-card {
-    background-color: #f8f9fa;
+    background-color: white;
     padding: 20px;
     border-radius: 8px;
     text-align: center;
     border: 1px solid #dee2e6;
 }
 
-/* CORREÇÃO: Alinha ícones nos títulos do dashboard */
 .dashboard-card h3 {
     margin-top: 0;
     font-size: 16px;
@@ -329,7 +373,6 @@ td.action-buttons {
     padding: 8px;
     border: 1px solid #ddd;
     border-radius: 4px;
-    margin-bottom: 15px;
 }
 
 .table-footer {
@@ -340,7 +383,7 @@ td.action-buttons {
     font-size: 14px;
     color: #6c757d;
     border-top: 1px solid #dee2e6;
-    margin-top: 0px;
+    margin-top: -20px;
     padding: 20px;
 }
 
@@ -353,6 +396,7 @@ td.action-buttons {
     border: 1px solid #dee2e6;
     cursor: pointer;
     font-size: 14px;
+    gap: 0;
 }
 
 .pagination-controls button:hover {
@@ -447,5 +491,52 @@ tr:hover td {
 .filtro-extrato {
     display: flex;
     gap: 10px;
-    margin-bottom: 10px;
-}   
+}
+
+.header-com-botao {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+.botao-secundario {
+    width: auto;
+    padding: 8px 12px;
+    background-color: #6c757d;
+    font-size: 14px;
+}
+.botao-secundario:hover {
+    background-color: #5a6268;
+}
+
+.modal-content.modal-sm {
+    max-width: 400px;
+}
+
+.modal-content p {
+    font-size: 16px;
+    color: #333;
+    text-align: center;
+    margin: 20px 0;
+}
+
+.modal-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
+    margin-top: 20px;
+}
+
+.modal-actions button {
+    width: auto;
+    padding: 10px 20px;
+}
+
+.botao-perigo {
+    background-color: #dc3545;
+}
+.botao-perigo:hover {
+    background-color: #c82333;
+}
