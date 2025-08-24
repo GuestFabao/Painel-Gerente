@@ -11,6 +11,8 @@ document.addEventListener('DOMContentLoaded', () => {
         handleCreditosPage(auth, db);
     } else if (document.title.includes('Configurações')) {
         handleConfiguracoesPage(auth, db);
+    } else if (document.title.includes('Relatórios')) {
+        handleRelatoriosPage(auth, db);
     } else if (document.body.contains(document.getElementById('loginForm'))) {
         handleLoginPage(auth);
     }
@@ -128,19 +130,7 @@ function handleCreditosPage(auth, db) {
                 tr.dataset.id = compra.id;
                 tr.dataset.quantidade = compra.quantidade;
                 const dataCompra = compra.data.toDate().toLocaleDateString('pt-BR');
-                tr.innerHTML = `
-                    <td>${dataCompra}</td>
-                    <td>${compra.quantidade}</td>
-                    <td class="actions-cell">
-                        <div class="actions-menu-container">
-                            <button class="kebab-button"><i class="fas fa-ellipsis-v"></i></button>
-                            <div class="actions-dropdown">
-                                <a href="#" class="dropdown-item edit btn-edit"><i class="fas fa-pencil-alt"></i> Editar</a>
-                                <a href="#" class="dropdown-item delete btn-delete"><i class="fas fa-trash-alt"></i> Excluir</a>
-                            </div>
-                        </div>
-                    </td>
-                `;
+                tr.innerHTML = `<td>${dataCompra}</td><td>${compra.quantidade}</td><td class="actions-cell"><div class="actions-menu-container"><button class="kebab-button"><i class="fas fa-ellipsis-v"></i></button><div class="actions-dropdown"><a href="#" class="dropdown-item edit btn-edit"><i class="fas fa-pencil-alt"></i> Editar</a><a href="#" class="dropdown-item delete btn-delete"><i class="fas fa-trash-alt"></i> Excluir</a></div></div></td>`;
                 tbody.appendChild(tr);
             });
         }
@@ -221,7 +211,7 @@ function handleCreditosPage(auth, db) {
             });
         }
     });
-
+    
     window.addEventListener('click', (e) => {
         if (!e.target.closest('.actions-menu-container')) {
             document.querySelectorAll('.actions-dropdown.show').forEach(dropdown => {
@@ -275,6 +265,101 @@ function handleConfiguracoesPage(auth, db) {
 
     carregarConfiguracoes();
 }
+
+// ==================================================================
+// FUNÇÃO PARA A PÁGINA DE RELATÓRIOS
+// ==================================================================
+async function handleRelatoriosPage(auth, db) {
+    auth.onAuthStateChanged(user => { if (!user) { window.location.href = 'index.html'; } });
+    const logoutButton = document.getElementById('logoutButton');
+    logoutButton.addEventListener('click', () => { auth.signOut().then(() => { window.location.href = 'index.html'; }); });
+
+    const configRef = db.collection('configuracoes').doc('valores');
+    const clientesRef = db.collection('clientes');
+    let myChart;
+
+    async function gerarGrafico() {
+        const configDoc = await configRef.get();
+        const custoCredito = configDoc.exists ? configDoc.data().custoCredito : 10;
+
+        const clientesSnapshot = await clientesRef.get();
+        const promessasPagamentos = [];
+        clientesSnapshot.forEach(clienteDoc => {
+            const pagamentosPromise = clientesRef.doc(clienteDoc.id).collection('historicoPagamentos').get();
+            promessasPagamentos.push(pagamentosPromise);
+        });
+
+        const resultados = await Promise.all(promessasPagamentos);
+        const todosPagamentos = [];
+        resultados.forEach(snapshot => {
+            snapshot.forEach(doc => {
+                todosPagamentos.push(doc.data());
+            });
+        });
+
+        const dadosMensais = {};
+        const meses = ["Jan", "Fev", "Mar", "Abr", "Mai", "Jun", "Jul", "Ago", "Set", "Out", "Nov", "Dez"];
+        
+        for (let i = 11; i >= 0; i--) {
+            const d = new Date();
+            d.setMonth(d.getMonth() - i);
+            const chave = `${d.getFullYear()}-${meses[d.getMonth()]}`;
+            dadosMensais[chave] = { faturamento: 0, lucro: 0 };
+        }
+
+        todosPagamentos.forEach(pag => {
+            const data = pag.dataPagamento.toDate();
+            const chave = `${data.getFullYear()}-${meses[data.getMonth()]}`;
+            if (dadosMensais[chave]) {
+                dadosMensais[chave].faturamento += pag.valor;
+                dadosMensais[chave].lucro += (pag.valor - custoCredito);
+            }
+        });
+
+        const labels = Object.keys(dadosMensais);
+        const faturamentoData = Object.values(dadosMensais).map(d => d.faturamento);
+        const lucroData = Object.values(dadosMensais).map(d => d.lucro);
+
+        const ctx = document.getElementById('lucroMensalChart').getContext('2d');
+        
+        if (myChart) {
+            myChart.destroy();
+        }
+
+        myChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: labels,
+                datasets: [
+                    {
+                        label: 'Faturamento (R$)',
+                        data: faturamentoData,
+                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        borderWidth: 1
+                    },
+                    {
+                        label: 'Lucro (R$)',
+                        data: lucroData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderColor: 'rgba(75, 192, 192, 1)',
+                        borderWidth: 1
+                    }
+                ]
+            },
+            options: {
+                scales: {
+                    y: {
+                        beginAtZero: true
+                    }
+                }
+            }
+        });
+    }
+
+    gerarGrafico();
+}
+
 
 // ==================================================================
 // FUNÇÃO DA PÁGINA DE CLIENTES (FINAL)
@@ -387,16 +472,7 @@ async function handleGerenciadorPage(auth, db, storage) {
             if (statusExibido === 'Atrasado' || statusExibido === 'Pendente') {
                 botoesAcao = `<button class="btn-confirmar"><i class="fas fa-check"></i> Confirmar Pagamento</button>`;
             } else {
-                botoesAcao = `
-                    <div class="actions-menu-container">
-                        <button class="kebab-button"><i class="fas fa-ellipsis-v"></i></button>
-                        <div class="actions-dropdown">
-                            <a href="#" class="dropdown-item history btn-history"><i class="fas fa-history"></i> Histórico</a>
-                            <a href="#" class="dropdown-item edit btn-edit"><i class="fas fa-pencil-alt"></i> Editar</a>
-                            <a href="#" class="dropdown-item delete btn-delete"><i class="fas fa-trash-alt"></i> Excluir</a>
-                        </div>
-                    </div>
-                `;
+                botoesAcao = `<div class="actions-menu-container"><button class="kebab-button"><i class="fas fa-ellipsis-v"></i></button><div class="actions-dropdown"><a href="#" class="dropdown-item history btn-history"><i class="fas fa-history"></i> Histórico</a><a href="#" class="dropdown-item edit btn-edit"><i class="fas fa-pencil-alt"></i> Editar</a><a href="#" class="dropdown-item delete btn-delete"><i class="fas fa-trash-alt"></i> Excluir</a></div></div>`;
             }
 
             let comprovanteHtml = 'N/A';
@@ -675,17 +751,4 @@ function setupPagination(totalItems, wrapper, displayFunction, infoWrapper) {
         displayFunction(currentPage + 1);
     });
     wrapper.appendChild(nextButton);
-}
-
-// ==================================================================
-// REGISTO DO SERVICE WORKER
-// ==================================================================
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker.register('/sw.js').then(registration => {
-      console.log('Service Worker registado com sucesso:', registration.scope);
-    }).catch(error => {
-      console.log('Falha no registo do Service Worker:', error);
-    });
-  });
 }

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Configurações - Controle IPTV</title>
+    <title>Relatórios - Controle IPTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
@@ -18,8 +18,8 @@
             <nav class="sidebar-nav">
                 <a href="gerenciador.html"><i class="fas fa-users"></i> Clientes</a>
                 <a href="creditos.html"><i class="fas fa-coins"></i> Créditos</a>
-                <a href="configuracoes.html" class="active"><i class="fas fa-cog"></i> Configurações</a>
-                <a href="relatorios.html"><i class="fas fa-chart-bar"></i> Relatórios</a>
+                <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
+                <a href="relatorios.html" class="active"><i class="fas fa-chart-bar"></i> Relatórios</a>
             </nav>
         </aside>
 
@@ -28,35 +28,23 @@
             <header class="main-header">
                 <div class="header-left">
                     <button id="sidebarToggle"><i class="fas fa-bars"></i></button>
-                    <h1>Configurações</h1>
+                    <h1>Relatórios</h1>
                 </div>
                 <button id="logoutButton"><i class="fas fa-sign-out-alt"></i> Sair</button>
             </header>
 
             <div class="content-wrapper">
-                <div class="form-container">
-                    <h3><i class="fas fa-dollar-sign"></i> Preços e Custos</h3>
-                    <form id="configForm">
-                        <div class="input-group">
-                            <label for="precoMensal">Preço do Plano Mensal (R$)</label>
-                            <input type="number" id="precoMensal" min="0" step="0.01" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="precoTrimestral">Preço do Plano Trimestral (R$)</label>
-                            <input type="number" id="precoTrimestral" min="0" step="0.01" required>
-                        </div>
-                        <div class="input-group">
-                            <label for="custoCredito">Custo por Crédito (R$)</label>
-                            <input type="number" id="custoCredito" min="0" step="0.01" required>
-                        </div>
-                        <button type="submit"><i class="fas fa-save"></i> Salvar Configurações</button>
-                    </form>
-                </div>
+                <h3>Faturamento vs. Lucro (Últimos 12 Meses)</h3>
+                <!-- O gráfico será desenhado neste elemento canvas -->
+                <canvas id="lucroMensalChart"></canvas>
             </div>
         </main>
     </div>
 
     <!-- Scripts -->
+    <!-- BIBLIOTECA DE GRÁFICOS CHART.JS -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.1/firebase-auth.js"></script>

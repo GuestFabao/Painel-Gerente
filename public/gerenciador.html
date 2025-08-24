@@ -6,20 +6,21 @@
     <title>Clientes - Controle IPTV</title>
     <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" type="text/css" href="https://cdn.jsdelivr.net/npm/toastify-js/src/toastify.min.css">
-    <!-- LINK PARA OS ÍCONES (Font Awesome) -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css">
+    <link rel="manifest" href="manifest.json">
 </head>
 <body>
     <div class="app-container">
         <!-- MENU LATERAL (Sidebar) -->
         <aside class="sidebar">
             <div class="sidebar-header">
-                <h2>Painel IPTV</h2>
+                <h2>Gerenciar</h2>
             </div>
             <nav class="sidebar-nav">
                 <a href="gerenciador.html" class="active"><i class="fas fa-users"></i> Clientes</a>
                 <a href="creditos.html"><i class="fas fa-coins"></i> Créditos</a>
                 <a href="configuracoes.html"><i class="fas fa-cog"></i> Configurações</a>
+                <a href="relatorios.html"><i class="fas fa-chart-bar"></i> Relatórios</a>
             </nav>
         </aside>
 
@@ -116,7 +117,7 @@
         </main>
     </div>
 
-    <!-- MODAL DE EDIÇÃO -->
+    <!-- MODAIS -->
     <div id="editModal" class="modal-background">
         <div class="modal-content">
             <span id="closeModal" class="modal-fechar">&times;</span>
@@ -162,22 +163,35 @@
             </form>
         </div>
     </div>
-
-        <!-- ================================================================== -->
-    <!-- NOVA JANELA MODAL PARA CONFIRMAÇÃO DE EXCLUSÃO -->
-    <!-- ================================================================== -->
+    <div id="historyModal" class="modal-background">
+        <div class="modal-content">
+            <span id="closeHistoryModal" class="modal-fechar">&times;</span>
+            <h2>Histórico de Pagamentos</h2>
+            <h3 id="historyModalClientName" class="modal-subtitle"></h3>
+            <div class="table-container-modal">
+                <table id="historyTable">
+                    <thead>
+                        <tr>
+                            <th>Data do Pagamento</th>
+                            <th>Plano</th>
+                            <th>Valor Pago</th>
+                        </tr>
+                    </thead>
+                    <tbody id="historyTbody"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
     <div id="confirmModal" class="modal-background">
         <div class="modal-content modal-sm">
             <h2 id="confirmModalTitle">Confirmar Ação</h2>
-            <p id="confirmModalMessage">Tem a certeza de que deseja continuar?</p>
+            <p id="confirmModalMessage">Tem a certeza?</p>
             <div class="modal-actions">
                 <button id="cancelButton" class="botao-secundario">Cancelar</button>
                 <button id="confirmButton" class="botao-perigo">Confirmar</button>
             </div>
         </div>
     </div>
-    <!-- FIM DO MODAL -->
-
 
     <!-- Scripts -->
     <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/toastify-js"></script>
@@ -194,8 +208,6 @@
         messagingSenderId: "751962653113",
         appId: "1:751962653113:web:31308aea4cb018dd59b668"
       };
-
-      
       firebase.initializeApp(firebaseConfig);
     </script>
     <script src="script.js"></script>
